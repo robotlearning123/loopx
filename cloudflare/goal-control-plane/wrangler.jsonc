@@ -1,0 +1,41 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "loopx-goal-control-plane",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-19",
+  "compatibility_flags": ["nodejs_compat"],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "GOAL_COORDINATOR",
+        "class_name": "GoalCoordinator"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["GoalCoordinator"]
+    }
+  ],
+  "queues": {
+    "producers": [
+      {
+        "queue": "loopx-goal-commands",
+        "binding": "GOAL_COMMANDS"
+      }
+    ],
+    "consumers": [
+      {
+        "queue": "loopx-goal-commands",
+        "max_batch_size": 10,
+        "max_batch_timeout": 5,
+        "max_retries": 3
+      }
+    ]
+  },
+  "vars": {
+    "CONTROL_PLANE_VERSION": "cloudflare_goal_control_plane_v1",
+    "MAX_LEASE_SECONDS": "900"
+  }
+}

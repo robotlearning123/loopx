@@ -65,6 +65,7 @@ from .cli_commands import (
     handle_benchmark_command,
     handle_bootstrap_connect_command,
     handle_canary_command,
+    handle_cloudflare_goal_command,
     handle_capability_command,
     handle_check_command,
     handle_diagnose_command,
@@ -106,6 +107,7 @@ from .cli_commands import (
     register_turn_commands,
     register_bootstrap_connect_command,
     register_canary_commands,
+    register_cloudflare_goal_commands,
     register_capability_commands,
     register_doctor_command,
     register_dreaming_commands,
@@ -236,6 +238,8 @@ def build_parser() -> LoopXArgumentParser:
     register_support_control_commands(sub, add_subcommand_format)
 
     register_canary_commands(sub, add_subcommand_format)
+
+    register_cloudflare_goal_commands(sub, add_subcommand_format)
 
     register_capability_commands(sub, add_subcommand_format)
 
@@ -428,6 +432,14 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "opencode2-goal-worker":
         return handle_opencode2_goal_worker_command(args, print_payload)
+
+    cloudflare_goal_result = handle_cloudflare_goal_command(
+        args,
+        print_payload=print_payload,
+        output_format=output_format,
+    )
+    if cloudflare_goal_result is not None:
+        return cloudflare_goal_result
 
     worker_bridge_result = handle_worker_bridge_command(
         args,
