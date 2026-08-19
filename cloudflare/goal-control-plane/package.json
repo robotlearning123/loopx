@@ -7,6 +7,7 @@
   "scripts": {
     "check": "tsc --noEmit",
     "test": "vitest run",
+    "acceptance": "node scripts/acceptance.mjs",
     "dev": "wrangler dev",
     "deploy": "wrangler deploy"
   },

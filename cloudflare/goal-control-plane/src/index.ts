@@ -154,13 +154,13 @@ export class GoalCoordinator implements DurableObject {
         case "GET /snapshot":
           return json({ ok: true, goal: publicGoal(await this.load(goalId)) });
         case "POST /claim":
-          return this.claim(goalId, await parseJsonObject(request));
+          return await this.claim(goalId, await parseJsonObject(request));
         case "POST /renew":
-          return this.renew(goalId, await parseJsonObject(request));
+          return await this.renew(goalId, await parseJsonObject(request));
         case "POST /release":
-          return this.release(goalId, await parseJsonObject(request));
+          return await this.release(goalId, await parseJsonObject(request));
         case "POST /commands":
-          return this.command(goalId, await parseJsonObject(request));
+          return await this.command(goalId, await parseJsonObject(request));
         default:
           return error(404, "route_not_found", "goal route is not defined");
       }

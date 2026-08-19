@@ -112,3 +112,45 @@ describe("GoalCoordinator", () => {
     expect(commandBody.queue_message.epoch).toBe(claimBody.lease.epoch);
   });
 });
+
+
+describe("GoalCoordinator lease recovery", () => {
+  it("rejects a released old lease after another agent reclaims the goal", async () => {
+    const coordinator = makeCoordinator();
+    const claim = await coordinator.fetch(request("/claim", {
+      agent_id: "triage-agent",
+      idempotency_key: "claim-repair-orders-45-a",
+      requested_lease_seconds: 300,
+    }));
+    const first = await body(claim);
+
+    const release = await coordinator.fetch(request("/release", {
+      agent_id: "triage-agent",
+      lease_id: first.lease.lease_id,
+      epoch: first.lease.epoch,
+      idempotency_key: "release-repair-orders-45-a",
+    }));
+    expect(release.status).toBe(200);
+
+    const reclaim = await coordinator.fetch(request("/claim", {
+      agent_id: "review-agent",
+      idempotency_key: "claim-repair-orders-45-b",
+      requested_lease_seconds: 300,
+    }));
+    const second = await body(reclaim);
+    expect(second.lease.epoch).toBe(2);
+
+    const staleCommand = await coordinator.fetch(request("/commands", {
+      agent_id: "triage-agent",
+      lease_id: first.lease.lease_id,
+      epoch: first.lease.epoch,
+      command_id: "command-repair-orders-45-old",
+      action_kind: "triage",
+      action_scope: "read_only",
+      expected_state_version: second.state_version,
+    }));
+    const staleBody = await body(staleCommand);
+    expect(staleCommand.status).toBe(409);
+    expect(staleBody.error.code).toBe("stale_or_invalid_lease");
+  });
+});

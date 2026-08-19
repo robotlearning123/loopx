@@ -76,9 +76,12 @@ python -m loopx.cli cloudflare-goal claim-request \
 cd cloudflare/goal-control-plane
 pnpm check
 pnpm test
+pnpm acceptance
 ```
 
-单元测试覆盖 lease 排他、幂等 claim 重放、陈旧 state version 拒绝以及命令只生成无副作用 wakeup receipt。仓库级 CLI smoke 可运行：
+`pnpm acceptance` 会在隔离的本地 Worker 运行时中检查 public health、认证拒绝、lease 排他、幂等 claim/command 重放、state-version 围栏、release/reclaim epoch 递增、旧 lease 拒绝、effect-free Queue wakeup 以及静态边界。每次运行生成被 Git 忽略的 `artifacts/acceptance.json`，其中只含 status、稳定 ID、epoch 和版本，不包含凭据或原始 payload。所有验收项均通过才允许部署。详细标准见 [`docs/integrations/cloudflare-goal-control-plane-acceptance.md`](../../docs/integrations/cloudflare-goal-control-plane-acceptance.md)。
+
+仓库级 CLI smoke 可运行：
 
 ```bash
 python -m loopx.cli cloudflare-goal contract --base-url https://control.example --format json
